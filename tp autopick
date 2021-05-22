@@ -1,0 +1,46 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RS = game:GetService("RunService")
+
+local noclip = false
+
+spawn(function()
+    _G.autopickup = true
+    while _G.autopickup do
+        for _, item in pairs(workspace.StandardItemBin:GetChildren()) do
+            local part = item:FindFirstChildWhichIsA("BasePart")
+            local LPchar = LocalPlayer.Character
+            if part and LPchar then
+                local hrp = LPchar:FindFirstChild("HumanoidRootPart")
+                local hum = LPchar:FindFirstChild("Humanoid")
+                if hrp then
+                    local oldpos = LPchar.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+                    noclip = true
+                    hrp.Anchored = true
+                    repeat
+                        hrp.CFrame = part.CFrame * CFrame.Angles(math.rad(180),0,0) - Vector3.new(0,5,0)
+                        game:GetService("ReplicatedStorage").Events.PickupItem:FireServer(item)
+                        RS.Heartbeat:Wait()
+                    until not LPchar or not hrp or not item:IsDescendantOf(workspace.StandardItemBin)
+                    if hrp then
+                        hrp.CFrame = oldpos
+                        hrp.Anchored = false
+                    end
+                    noclip = false
+                end
+            end
+        end
+        RS.Heartbeat:Wait()
+    end
+end)
+
+RS.Stepped:Connect(function()
+    if noclip then
+        pcall(function()
+            LocalPlayer.Character.Torso.CanCollide = false
+            LocalPlayer.Character.Head.CanCollide = false
+        end)
+    end
+end)
+
+warn("loaded tp autopick")
