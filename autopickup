@@ -1,0 +1,17 @@
+_G.autopickup = true
+
+spawn(function()
+    while _G.autopickup do
+        for _, item in pairs(workspace.StandardItemBin:GetChildren()) do
+            local args = {
+                [1] = item
+            }
+
+            game:GetService("ReplicatedStorage").Events.PickupItem:FireServer(unpack(args))
+            print("picked up")
+        end
+        wait()
+    end
+end)
+
+warn("loaded autopick")
