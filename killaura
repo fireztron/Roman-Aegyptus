@@ -1,0 +1,53 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local function GetClosestEnemyChar()
+    local Character = LocalPlayer.Character
+    local HumanoidRootPart = Character and Character:FindFirstChild("HumanoidRootPart")
+    if not (Character or HumanoidRootPart) then return end
+
+    local TargetDistance = math.huge
+    local Target
+
+    for i,v in ipairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+            local TargetHRP = v.Character.HumanoidRootPart
+            local mag = (HumanoidRootPart.Position - TargetHRP.Position).magnitude
+            if mag < TargetDistance then
+                TargetDistance = mag
+                Target = v
+            end
+        end
+    end
+
+    return Target.Character
+end
+
+_G.killaura = true
+spawn(function()
+    while _G.killaura do
+        local char = GetClosestEnemyChar()
+        local LPchar = LocalPlayer.Character
+        if char and LPchar then
+            local distance = (char.HumanoidRootPart.Position - LPchar.HumanoidRootPart.Position).Magnitude
+            if distance < 30 then
+                local hum = char:FindFirstChild("Humanoid")
+                local weapon = LPchar:FindFirstChildOfClass("Tool")
+                if weapon then
+                    local signature = weapon:FindFirstChild("RightSlash")
+                    if hum and signature then
+                        local args = {
+                            [1] = "dmg",
+                            [2] = hum
+                        }
+                        print("firing")
+                        weapon.__info.__remotes.swordEvent:FireServer(unpack(args))
+                    end
+                end
+            end
+        end
+        wait(.01)
+    end
+end)
+
+warn("loaded killaura")
